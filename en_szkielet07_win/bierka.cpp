@@ -2,7 +2,8 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
-#include<string.h>
+#include<string>
+#include<cstdlib>
 
 using namespace std;
 
@@ -81,43 +82,6 @@ vector <string> bierka::split(string wiersz)
         return res;
     }
 
-int bierka::str2int(string str)
-    {
-        int integer = 0;
-        for(int i = 0; i < str.size(); i++)
-        {
-            integer = integer * 10 + int(str[i] - '0');
-        }
-        return integer;
-    }
-
-float bierka::str2f(string str)
-    {
-        float d, integer = 0, decimal = 0, k = 0.1;
-        int sign, flag = 0;
-        if(str[0] == '-'){sign = -1;}
-        else{sign = 1;}
-        for(int i = 0; i < str.length(); i++)
-        {
-            if(str[i] >= '0' && str[i] <= '9')
-            {
-                if(flag == 0)
-                {
-                    integer *= 10;
-                    integer += int(str[i] - '0');
-                }
-                else
-                {
-                    decimal += k * int(str[i] - '0');
-                    k /= 10;
-                }
-            }
-            else if(str[i] == '.'){flag = 1;}
-        }
-        d = sign * (integer + decimal);
-        return d;
-    }
-
 string bierka::simplify(string wiersz)
     {
         string res = wiersz.substr(2);
@@ -141,7 +105,7 @@ void bierka::modelLoader(string filename) {
             for(int i = 1; i < splitted.size(); i++)
             {
                 koord = splitted[i];
-                wierzcholki.push_back(str2f(koord)/240.0);
+                wierzcholki.push_back(atof(koord.c_str())/240.0);
             }
         }
         else if(wiersz[0] == 'v' && wiersz[1] == 't')
@@ -149,7 +113,7 @@ void bierka::modelLoader(string filename) {
             for(int i = 1; i < splitted.size(); i++)
             {
                 koord = splitted[i];
-                tekstury.push_back(str2f(koord)/240.0);
+                tekstury.push_back(atof(koord.c_str())/240.0);
             }
         }
         else if(wiersz[0] == 'v' && wiersz[1] == 'n')
@@ -157,7 +121,7 @@ void bierka::modelLoader(string filename) {
             for(int i = 1; i < splitted.size(); i++)
             {
                 koord = splitted[i];
-                normalne.push_back(str2f(koord)/240.0);
+                normalne.push_back(atof(koord.c_str())/240.0);
             }
         }
         else if(wiersz[0] == 'f')
@@ -172,17 +136,17 @@ void bierka::modelLoader(string filename) {
                     switch(iter)
                     {
                     case 0:
-                        w_indeksy.push_back(str2int(pom) - 1);
+                        w_indeksy.push_back(atoi(pom.c_str()) - 1);
                         iter ++;
                         break;
 
                     case 1:
-                        if(pom != "") t_indeksy.push_back(str2int(pom) - 1);
+                        if(pom != "") t_indeksy.push_back(atoi(pom.c_str()) - 1);
                         iter ++;
                         break;
 
                     case 2:
-                        n_indeksy.push_back(str2int(pom) - 1);
+                        n_indeksy.push_back(atoi(pom.c_str()) - 1);
                         iter = 0;
                         break;
 
@@ -193,7 +157,7 @@ void bierka::modelLoader(string filename) {
                 }
                 else pom = pom + uproszczony[i];
             }
-            if(pom != "") n_indeksy.push_back(str2int(pom) - 1);
+            if(pom != "") n_indeksy.push_back(atoi(pom.c_str()) - 1);
         }
     }
 
