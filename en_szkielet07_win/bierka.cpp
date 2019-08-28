@@ -1,12 +1,16 @@
 #include "bierka.h"
 #include<iostream>
 #include<fstream>
+#include<vector>
+#include<string.h>
+
 using namespace std;
 
 bierka::bierka(int x, int y)
 {
     pozycjaX = x;
     pozycjaY = y;
+    licz_wierz = 0;
 }
 
 bierka::~bierka()
@@ -46,221 +50,169 @@ void bierka::setY(int y)
     pozycjaY = y;
 }
 
-vector <string> bierka::split_line(string line)
-        {
-            std::vector < string > splitted;
-            string pom = "";
-            for(int i = 0; i < line.length(); i++)
-            {
-                if(line[i] == ' ')
-                {
-                    splitted.push_back(pom);
-                    pom = "";
-                }
-                else
-                {
-                    pom += line[i];
-                }
-            }
-            splitted.push_back(pom);
-            return splitted;
-        }
+int licz_wierz;
 
-int bierka::wyst(string line)
-        {
-            int licznik = 0;
-            for(int i =0; i<line.length();i++)
-            {
-                if(line[i] == '/')
-                {
-                    licznik ++;
-                }
-            }
-            return licznik;
-        }
+vector <float> wierzcholki;
+vector <float> tekstury;
+vector <float> normalne;
 
-string bierka::f_line(string line)
+vector <int> w_indeksy;
+vector <int> t_indeksy;
+vector <int> n_indeksy;
+
+vector <float> vert;
+vector <float> tex;
+vector <float> norm;
+
+vector <string> bierka::split(string wiersz)
+    {
+        vector <string> res;
+        string pom = "";
+        for(int i = 0; i < wiersz.length(); i++)
         {
-            string newline = line.substr(2);
-            for(int i = 0; i<newline.length(); i++)
+            if(wiersz[i] == ' ')
             {
-                if(newline[i] == ' ')
-                {
-                    newline[i] = '/';
-                }
+                res.push_back(pom);
+                pom = "";
             }
-            return newline;
+            else pom += wiersz[i];
         }
+        res.push_back(pom);
+        return res;
+    }
 
 int bierka::str2int(string str)
+    {
+        int integer = 0;
+        for(int i = 0; i < str.size(); i++)
         {
-            int integer = 0;
-            for(int i = 0; i < str.size(); i++)
-            {
-                integer = integer * 10 + int(str[i] - '0');
-            }
-            return integer;
+            integer = integer * 10 + int(str[i] - '0');
         }
+        return integer;
+    }
 
 float bierka::str2f(string str)
+    {
+        float d, integer = 0, decimal = 0, k = 0.1;
+        int sign, flag = 0;
+        if(str[0] == '-'){sign = -1;}
+        else{sign = 1;}
+        for(int i = 0; i < str.length(); i++)
         {
-            float d, integer = 0, decimal = 0, k = 0.1;
-            int sign, flag = 0;
-            if(str[0] == '-'){sign = -1;}
-            else{sign = 1;}
-            for(int i = 0; i < str.length(); i++)
+            if(str[i] >= '0' && str[i] <= '9')
             {
-                if(str[i] >= '0' && str[i] <= '9')
+                if(flag == 0)
                 {
-                    if(flag == 0)
-                    {
-                        integer *= 10;
-                        integer += int(str[i] - '0');
-                    }
-                    else
-                    {
-                        decimal += k * int(str[i] - '0');
-                        k /= 10;
-                    }
-                }
-                else if(str[i] == '.'){flag = 1;}
-            }
-            d = sign * (integer + decimal);
-            return d;
-        }
-
-void bierka::ObjLoader(string file) {
-      string line, splitted;
-      ifstream myfile;
-      myfile.open(file.c_str());
-      while ( getline (myfile,line) )
-      {
-        if(line[0] == 'v' && line[1] == ' ')
-        {
-            if(line[2] == ' ')
-            {
-                line.erase(1,1);
-            }
-            for(int i = 1; i < split_line(line).size(); i++)
-            {
-                splitted = split_line(line)[i];
-                this -> vertices.push_back(str2f(splitted)/50.0);
-            }
-        }
-        else if(line[0] == 'v' && line[1] == 't')
-        {
-            for(int i = 1; i < split_line(line).size(); i++)
-            {
-                splitted = split_line(line)[i];
-                this -> textures.push_back(str2f(splitted)/50.0);
-            }
-        }
-        else if(line[0] == 'v' && line[1] == 'n')
-        {
-            for(int i = 1; i < split_line(line).size(); i++)
-            {
-                splitted = split_line(line)[i];
-                this -> normals.push_back(str2f(splitted)/50.0);
-            }
-        }
-        else if(line[0] == 'f')
-        {
-            string newline = f_line(line);
-            int licznik = 0;
-            string pom = "";
-            int n = wyst(newline);
-            for(int i =0; i<newline.length(); i++)
-            {
-                if(newline[i] == '/')
-                {
-                    if(licznik == 0)
-                    {
-                        if(n > 9)
-                        {
-                            this -> index_vert_czworo.push_back(str2int(pom) - 1);
-                        }
-                        else
-                        {
-                            this -> index_vert_troj.push_back(str2int(pom) - 1);
-                        }
-                    }
-                    if(licznik == 1)
-                    {
-                        if(pom != ""){
-                            if(n > 9)
-                            {
-                                this -> index_tex_czworo.push_back(str2int(pom) - 1);
-                            }
-                            else
-                            {
-                                this -> index_tex_troj.push_back(str2int(pom) - 1);
-                            }
-                        }
-                    }
-                    if(licznik == 2)
-                    {
-                        if(n > 9)
-                        {
-                            this -> index_norm_czworo.push_back(str2int(pom) - 1);
-                        }
-                        else
-                        {
-                            this -> index_norm_troj.push_back(str2int(pom) - 1);
-                        }
-                    }
-                    if(licznik == 2)
-                    {
-                        licznik = 0;
-                    }
-                    else{
-                        licznik ++;
-                    }
-                    pom = "";
+                    integer *= 10;
+                    integer += int(str[i] - '0');
                 }
                 else
                 {
-                    pom = pom + newline[i];
+                    decimal += k * int(str[i] - '0');
+                    k /= 10;
                 }
             }
-            if(n > 9)
+            else if(str[i] == '.'){flag = 1;}
+        }
+        d = sign * (integer + decimal);
+        return d;
+    }
+
+string bierka::simplify(string wiersz)
+    {
+        string res = wiersz.substr(2);
+        for(int i = 0; i < res.length(); i++)
+        {
+            if(res[i] == '/') res[i] = ' ';
+        }
+        return res;
+    }
+
+void bierka::modelLoader(string filename) {
+    string wiersz, koord;
+    vector <string> splitted;
+    ifstream plik;
+    plik.open(filename.c_str());
+    while( getline(plik, wiersz) )
+    {
+        splitted = split(wiersz);
+        if(wiersz[0] == 'v' && wiersz[1] == ' ')
+        {
+            for(int i = 1; i < splitted.size(); i++)
             {
-                this -> index_norm_czworo.push_back(str2int(pom) - 1);
-            }
-            else
-            {
-                this -> index_norm_troj.push_back(str2int(pom) - 1);
+                koord = splitted[i];
+                wierzcholki.push_back(str2f(koord)/240.0);
             }
         }
-      }
-      for(int i = 0; i < this -> index_vert_troj.size(); i++)
-      {
-          for(int j = 0; j < 3; j++)
-          {
-              this -> vertices3.push_back(this -> vertices[3*this -> index_vert_troj[i] + j]);
-              this -> normals3.push_back(this -> normals[3*this -> index_norm_troj[i] + j]);
-          }
-          if(textures.size() > 0)
-          {
-              for(int j = 0; j < 2; j++)
-              {
-                  this -> textures3.push_back(this -> textures[2*this -> index_tex_troj[i] + j]);
-              }
-          }
-      }
-      for(int i = 0; i < this -> index_vert_czworo.size(); i++)
-      {
-          for(int j = 0; j < 3; j++)
-          {
-              this -> vertices4.push_back(this -> vertices[3*this -> index_vert_czworo[i] + j]);
-              this -> normals4.push_back(this -> normals[3*this -> index_norm_czworo[i] + j]);
-          }
-          if(textures.size() > 0)
-          {
-              for(int j = 0; j < 2; j++)
-              {
-                  this -> textures4.push_back(this -> textures[2*this -> index_tex_czworo[i] + j]);
-              }
-          }
-      }
-      myfile.close();
+        else if(wiersz[0] == 'v' && wiersz[1] == 't')
+        {
+            for(int i = 1; i < splitted.size(); i++)
+            {
+                koord = splitted[i];
+                tekstury.push_back(str2f(koord)/240.0);
+            }
+        }
+        else if(wiersz[0] == 'v' && wiersz[1] == 'n')
+        {
+            for(int i = 1; i < splitted.size(); i++)
+            {
+                koord = splitted[i];
+                normalne.push_back(str2f(koord)/240.0);
+            }
+        }
+        else if(wiersz[0] == 'f')
+        {
+            string uproszczony = simplify(wiersz);
+            string pom = "";
+            int iter = 0;
+            for(int i = 0; i < uproszczony.length(); i++)
+            {
+                if(uproszczony[i] == ' ')
+                {
+                    switch(iter)
+                    {
+                    case 0:
+                        w_indeksy.push_back(str2int(pom) - 1);
+                        iter ++;
+                        break;
+
+                    case 1:
+                        if(pom != "") t_indeksy.push_back(str2int(pom) - 1);
+                        iter ++;
+                        break;
+
+                    case 2:
+                        n_indeksy.push_back(str2int(pom) - 1);
+                        iter = 0;
+                        break;
+
+                    default:
+                        break;
+                    }
+                    pom = "";
+                }
+                else pom = pom + uproszczony[i];
+            }
+            if(pom != "") n_indeksy.push_back(str2int(pom) - 1);
+        }
     }
+
+    for(int i = 0; i < w_indeksy.size(); i++)
+    {
+        for(int j = 0; j < 3; j++)
+        {
+            vert.push_back(wierzcholki[3*w_indeksy[i] + j]);
+            norm.push_back(normalne[3*n_indeksy[i] + j]);
+        }
+        if(tekstury.size() > 0)
+        {
+            for(int j = 0; j < 2; j++)
+            {
+                tex.push_back(tekstury[2*t_indeksy[i] + j]);
+            }
+        }
+    }
+    licz_wierz = w_indeksy.size();
+    cout << licz_wierz << endl;
+    plik.close();
+}

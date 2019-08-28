@@ -69,7 +69,6 @@ void windowResizeCallback(GLFWwindow* window,int width,int height) {
     glViewport(0,0,width,height);
 }
 
-bierka piiionek(0,0);
 
 //Function for reading texture files
 GLuint readTexture(const char* filename) {
@@ -95,6 +94,9 @@ GLuint readTexture(const char* filename) {
   return tex;
 }
 
+
+bierka * szachownica = new bierka(-1,-1);
+
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
 	//************Place any code here that needs to be executed once, at the program start************
@@ -106,7 +108,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 
     tex0=readTexture("metal.png");
     tex1=readTexture("sky.png");
-    piiionek.ObjLoader("pion.obj");
+    szachownica->modelLoader("plane.obj");
 
 }
 
@@ -120,63 +122,110 @@ void freeOpenGLProgram(GLFWwindow* window) {
     delete sp;
 }
 
+void drawFigure(bierka * bierka)
+{
+    float *verts=&bierka->vert[0];
+	float *normals=&bierka->norm[0];
+	float *texCoords=&bierka->tex[0];
+	unsigned int vertexCount=bierka->licz_wierz;
+}
+
+
 //Drawing procedure
-void drawScene(GLFWwindow* window,float angle_x,float angle_y) {
+void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*> bierki) {
 	//************Place any code here that draws something inside the window******************l
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm::mat4 V=glm::lookAt(
-        glm::vec3(0.0f,0.0f,-5.0f),
-        glm::vec3(0.0f,0.0f,0.0f),
-        glm::vec3(0.0f,1.0f,0.0f)); //compute view matrix
-    glm::mat4 P=glm::perspective(50.0f*PI/180.0f, aspectRatio, 1.0f, 50.0f); //compute projection matrix
-    glm::mat4 M=glm::mat4(1.0f);
-	M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Compute model matrix
-	M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Compute model matrix
+	float pozX, pozY;
 
-    //Cube
-	/*float *verts=myCubeVertices;
-	float *normals=myCubeNormals;
-	float *texCoords=myCubeTexCoords;
-	unsigned int vertexCount=myCubeVertexCount;*/
+    for(int i = 0; i < bierki.size(); i++)
+    {
+        pozX = -1.1f+(2.2/7.0)*bierki.at(i)->getX();
+        pozY = 1.1f-(2.2/7.0)*bierki.at(i)->getY();
 
-	//Teapot
-	float *verts=&piiionek.vertices3[0];
-	float *normals=&piiionek.normals3[0];
-	float *texCoords=&piiionek.textures3[0];
-	unsigned int vertexCount=66054;
+        glm::mat4 V=glm::lookAt(
+            glm::vec3(0.0f,0.0f,-5.0f),
+            glm::vec3(0.0f,0.0f,0.0f),
+            glm::vec3(0.0f,1.0f,0.0f)); //compute view matrix
+        glm::mat4 P=glm::perspective(50.0f*PI/180.0f, aspectRatio, 1.0f, 50.0f); //compute projection matrix
+        glm::mat4 M=glm::mat4(1.0f);
+        M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Compute model matrix
+        M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Compute model matrix
+        M=glm::translate(M, glm::vec3(pozX,0.0f,pozY));
+        if(i>23) M=glm::rotate(M,3.1416f,glm::vec3(0.0f,1.0f,0.0f));
 
-    sp->use();//activate shading program
-    //Send parameters to graphics card
-    glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
-    glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
-    glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
-    //glUniform4f(sp->u("lp"),0,0,-6,1); //Light coordinates in the world space
+        float *verts=&bierki.at(i)->vert[0];
+        float *normals=&bierki.at(i)->norm[0];
+        float *texCoords=&bierki.at(i)->tex[0];
+        unsigned int vertexCount=bierki.at(i)->licz_wierz;
 
-    //glUniform1i(sp->u("textureMap0"),0);
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D,tex0);
+        sp->use();//activate shading program
+        //Send parameters to graphics card
+        glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
+        glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
+        glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
+        //glUniform4f(sp->u("lp"),0,0,-6,1); //Light coordinates in the world space
 
-    //glUniform1i(sp->u("textureMap1"),1);
-    //glActiveTexture(GL_TEXTURE1);
-    //glBindTexture(GL_TEXTURE_2D,tex1);
+        //glUniform1i(sp->u("textureMap0"),0);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D,tex0);
 
-    glEnableVertexAttribArray(sp->a("vertex")); //Enable sending data to the attribute vertex
-    glVertexAttribPointer(sp->a("vertex"),3,GL_FLOAT,false,0,verts); //Specify source of the data for the attribute vertex
+        //glUniform1i(sp->u("textureMap1"),1);
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D,tex1);
+        if((i>7 && i<16) || (i>23)) glUniform4f(sp->u("color"),0.1,0.1,0.1,1);
+        else glUniform4f(sp->u("color"),1,1,1,1);
 
-    glEnableVertexAttribArray(sp->a("normal")); //Enable sending data to the attribute normal
-    glVertexAttribPointer(sp->a("normal"),3,GL_FLOAT,false,0,normals); //Specify source of the data for the attribute normal
+        glEnableVertexAttribArray(sp->a("vertex")); //Enable sending data to the attribute vertex
+        glVertexAttribPointer(sp->a("vertex"),3,GL_FLOAT,false,0,verts); //Specify source of the data for the attribute vertex
 
-    //glEnableVertexAttribArray(sp->a("texCoord0")); //Enable sending data to the attribute color
-    //glVertexAttribPointer(sp->a("texCoord0"),2,GL_FLOAT,false,0,texCoords); //Specify source of the data for the attribute color
+        glEnableVertexAttribArray(sp->a("normal")); //Enable sending data to the attribute normal
+        glVertexAttribPointer(sp->a("normal"),3,GL_FLOAT,false,0,normals); //Specify source of the data for the attribute normal
+
+        //glEnableVertexAttribArray(sp->a("texCoord0")); //Enable sending data to the attribute color
+        //glVertexAttribPointer(sp->a("texCoord0"),2,GL_FLOAT,false,0,texCoords); //Specify source of the data for the attribute color
 
 
-    glDrawArrays(GL_TRIANGLES,0,vertexCount); //Draw the object
+        glDrawArrays(GL_TRIANGLES,0,vertexCount); //Draw the object
 
-    glDisableVertexAttribArray(sp->a("vertex")); //Disable sending data to the attribute vertex
-    glDisableVertexAttribArray(sp->a("normal")); //Disable sending data to the attribute normal
-    //glDisableVertexAttribArray(sp->a("texCoord0")); //Disable sending data to the attribute color
+        glDisableVertexAttribArray(sp->a("vertex")); //Disable sending data to the attribute vertex
+        glDisableVertexAttribArray(sp->a("normal")); //Disable sending data to the attribute normal
+        //glDisableVertexAttribArray(sp->a("texCoord0")); //Disable sending data to the attribute color
+
+    }
+
+        glm::mat4 V=glm::lookAt(
+            glm::vec3(0.0f,0.0f,-5.0f),
+            glm::vec3(0.0f,0.0f,0.0f),
+            glm::vec3(0.0f,1.0f,0.0f)); //compute view matrix
+        glm::mat4 P=glm::perspective(50.0f*PI/180.0f, aspectRatio, 1.0f, 50.0f); //compute projection matrix
+        glm::mat4 M=glm::mat4(1.0f);
+        M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Compute model matrix
+        M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Compute model matrix
+
+        float *verts=&szachownica->vert[0];
+        float *normals=&szachownica->norm[0];
+        float *texCoords=&szachownica->tex[0];
+        unsigned int vertexCount=szachownica->licz_wierz;
+
+        sp->use();
+        glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
+        glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
+        glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
+
+        glUniform4f(sp->u("color"),0.87,0.72,0.53,0);
+
+        glEnableVertexAttribArray(sp->a("vertex")); //Enable sending data to the attribute vertex
+        glVertexAttribPointer(sp->a("vertex"),3,GL_FLOAT,false,0,verts); //Specify source of the data for the attribute vertex
+
+        glEnableVertexAttribArray(sp->a("normal")); //Enable sending data to the attribute normal
+        glVertexAttribPointer(sp->a("normal"),3,GL_FLOAT,false,0,normals); //Specify source of the data for the attribute normal
+
+        glDrawArrays(GL_TRIANGLES,0,vertexCount); //Draw the object
+
+        glDisableVertexAttribArray(sp->a("vertex")); //Disable sending data to the attribute vertex
+        glDisableVertexAttribArray(sp->a("normal")); //Disable sending data to the attribute normal
 
     glfwSwapBuffers(window); //Copy back buffer to front buffer
 }
@@ -191,79 +240,50 @@ typedef struct ruch {
 vector<bierka*> initBierki()
 {
 
-    vector<bierka*>  bierki;
+    vector<bierka*> bierki;
 
-    bierka * bialaWieza1 = new bierka(0, 0);
-    bierka * bialySkoczek1 = new bierka(1, 0);
-    bierka * bialyGoniec1 = new bierka(2, 0);
-    bierka * bialyHetman = new bierka(3, 0);
-    bierka * bialyKrol = new bierka(4, 0);
-    bierka * bialyGoniec2 = new bierka(5, 0);
-    bierka * bialySkoczek2 = new bierka(6, 0);
-    bierka * bialaWieza2 = new bierka(7, 0);
+    for(int j=0; j < 8; j++)
+    {
+        bierka * temp = new bierka(j, 1);
+        temp->modelLoader("pion.obj");
+        bierki.push_back(temp);
+    }
 
-    bierki.push_back(bialaWieza1);
-    bierki.push_back(bialySkoczek1);
-    bierki.push_back(bialyGoniec1);
-    bierki.push_back(bialyHetman);
-    bierki.push_back(bialyKrol);
-    bierki.push_back(bialyGoniec2);
-    bierki.push_back(bialySkoczek2);
-    bierki.push_back(bialaWieza2);
+    for(int j=0; j < 8; j++)
+    {
+        bierka * temp = new bierka(j, 6);
+        temp->modelLoader("pion.obj");
+        bierki.push_back(temp);
+    }
 
-    bierka * bialyPion1 = new bierka(0, 1);
-    bierka * bialyPion2 = new bierka(1, 1);
-    bierka * bialyPion3 = new bierka(2, 1);
-    bierka * bialyPion4 = new bierka(3, 1);
-    bierka * bialyPion5 = new bierka(4, 1);
-    bierka * bialyPion6 = new bierka(5, 1);
-    bierka * bialyPion7 = new bierka(6, 1);
-    bierka * bialyPion8 = new bierka(7, 1);
+    for(int j=0; j < 8; j+=7)
+    {
+        bierka * Wieza1 = new bierka(0, j);
+        Wieza1->modelLoader("tour.obj");
+        bierka * Skoczek1 = new bierka(1, j);
+        Skoczek1->modelLoader("cavalier.obj");
+        bierka * Goniec1 = new bierka(2, j);
+        Goniec1->modelLoader("fou.obj");
+        bierka * Hetman = new bierka(3, j);
+        Hetman->modelLoader("dame.obj");
+        bierka * Krol = new bierka(4, j);
+        Krol->modelLoader("roi.obj");
+        bierka * Goniec2 = new bierka(5, j);
+        Goniec2->modelLoader("fou.obj");
+        bierka * Skoczek2 = new bierka(6, j);
+        Skoczek2->modelLoader("cavalier.obj");
+        bierka * Wieza2 = new bierka(7, j);
+        Wieza2->modelLoader("tour.obj");
 
-    bierki.push_back(bialyPion1);
-    bierki.push_back(bialyPion2);
-    bierki.push_back(bialyPion3);
-    bierki.push_back(bialyPion4);
-    bierki.push_back(bialyPion5);
-    bierki.push_back(bialyPion6);
-    bierki.push_back(bialyPion7);
-    bierki.push_back(bialyPion8);
-
-    bierka * czarnaWieza1 = new bierka(0, 7);
-    bierka * czarnySkoczek1 = new bierka(1, 7);
-    bierka * czarnyGoniec1 = new bierka(2, 7);
-    bierka * czarnyHetman = new bierka(3, 7);
-    bierka * czarnyKrol = new bierka(4, 7);
-    bierka * czarnyGoniec2 = new bierka(5, 7);
-    bierka * czarnySkoczek2 = new bierka(6, 7);
-    bierka * czarnyWieza2 = new bierka(7, 7);
-
-    bierki.push_back(czarnaWieza1);
-    bierki.push_back(czarnySkoczek1);
-    bierki.push_back(czarnyGoniec1);
-    bierki.push_back(czarnyHetman);
-    bierki.push_back(czarnyKrol);
-    bierki.push_back(czarnyGoniec2);
-    bierki.push_back(czarnySkoczek2);
-    bierki.push_back(czarnyWieza2);
-
-    bierka * czarnyPion1 = new bierka(0, 6);
-    bierka * czarnyPion2 = new bierka(1, 6);
-    bierka * czarnyPion3 = new bierka(2, 6);
-    bierka * czarnyPion4 = new bierka(3, 6);
-    bierka * czarnyPion5 = new bierka(4, 6);
-    bierka * czarnyPion6 = new bierka(5, 6);
-    bierka * czarnyPion7 = new bierka(6, 6);
-    bierka * czarnyPion8 = new bierka(7, 6);
-
-    bierki.push_back(czarnyPion1);
-    bierki.push_back(czarnyPion2);
-    bierki.push_back(czarnyPion3);
-    bierki.push_back(czarnyPion4);
-    bierki.push_back(czarnyPion5);
-    bierki.push_back(czarnyPion6);
-    bierki.push_back(czarnyPion7);
-    bierki.push_back(czarnyPion8);
+        bierki.push_back(Wieza1);
+        bierki.push_back(Skoczek1);
+        bierki.push_back(Goniec1);
+        bierki.push_back(Hetman);
+        bierki.push_back(Krol);
+        bierki.push_back(Goniec2);
+        bierki.push_back(Skoczek2);
+        bierki.push_back(Wieza2);
+    }
 
     return bierki;
 }
@@ -325,8 +345,6 @@ int main(void)
             }
     }
 
-
-
 	GLFWwindow* window; //Pointer to object that represents the application window
 
 	glfwSetErrorCallback(error_callback);//Register error processing callback procedure
@@ -336,7 +354,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	window = glfwCreateWindow(500, 500, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it.
+	window = glfwCreateWindow(900, 900, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it.
 
 	if (!window) //If no window is opened then close the program
 	{
@@ -365,7 +383,7 @@ int main(void)
         angle_x+=speed_x*glfwGetTime(); //Add angle by which the object was rotated in the previous iteration
 		angle_y+=speed_y*glfwGetTime(); //Add angle by which the object was rotated in the previous iteration
         glfwSetTime(0); //Zero the timer
-		drawScene(window,angle_x,angle_y); //Execute drawing procedure
+		drawScene(window, angle_x, angle_y, bierki); //Execute drawing procedure
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
 	freeOpenGLProgram(window);

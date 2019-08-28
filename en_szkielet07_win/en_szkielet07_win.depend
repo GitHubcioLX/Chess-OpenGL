@@ -993,11 +993,16 @@
 
 1561211130 c:\users\admin\desktop\en_szkielet07_win\bierka.h
 
-1561211130 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\bierka.cpp
+1567008167 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\bierka.cpp
 	"bierka.h"
 	<iostream>
+	<fstream>
+	<vector>
+	<string.h>
 
-1561211130 c:\users\admin\desktop\chess-with-template\en_szkielet07_win\bierka.h
+1566936591 c:\users\admin\desktop\chess-with-template\en_szkielet07_win\bierka.h
+	<vector>
+	<string>
 
 1460755918 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\lodepng.cpp
 	"lodepng.h"
@@ -1013,7 +1018,7 @@
 	<iostream>
 	"lodepng.h"
 
-1566481018 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\main_file.cpp
+1567013027 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\main_file.cpp
 	<GL/glew.h>
 	<GLFW/glfw3.h>
 	<glm/glm.hpp>

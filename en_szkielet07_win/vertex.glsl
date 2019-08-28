@@ -4,6 +4,7 @@
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
+uniform vec4 color;
 
 //Attributes
 in vec4 vertex; //vertex coordinates in model space
@@ -15,7 +16,8 @@ out vec4 ic;
 
 void main(void) {
 
-    vec4 kd=vec4(0.9f,0.9f,0.9f,1.0f) ; //Object color
+    vec4 kd=color;
+    //vec4(0.9f,0.9f,0.9f,1.0f); //Object color
     vec4 ld=vec4(1,1,1,1); //Light color
 
     vec4 lp=vec4(0,0.5,0.1,1);//Light source location in world space
@@ -23,7 +25,7 @@ void main(void) {
     vec4 l=normalize(V*(lp-M*vertex)); //Light vector in eye space
     vec4 n=normalize(V*M*normal); //Normal vector in eye space
 
-    float nl=clamp(dot(n,l),0,1);
+    float nl=clamp(dot(n,l),0.3,1);
 
     ic=vec4(kd.rgb*nl,kd.a);
     gl_Position=P*V*M*vertex;

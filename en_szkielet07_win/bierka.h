@@ -17,33 +17,24 @@ class bierka
         int getY();
         void setX(int);
         void setY(int);
-        vector < float > vertices;
-        vector < float > textures;
-        vector < float > normals;
+        vector < float > wierzcholki;
+        vector < float > tekstury;
+        vector < float > normalne;
 
-        vector < float > vertices3;
-        vector < float > textures3;
-        vector < float > normals3;
+        vector < float > vert;
+        vector < float > tex;
+        vector < float > norm;
 
-        vector < float > vertices4;
-        vector < float > textures4;
-        vector < float > normals4;
+        vector < int > w_indeksy;
+        vector < int > t_indeksy;
+        vector < int > n_indeksy;
 
-        vector < int > index_vert_troj;
-        vector < int > index_tex_troj;
-        vector < int > index_norm_troj;
-
-        vector < int > index_vert_czworo;
-        vector < int > index_tex_czworo;
-        vector < int > index_norm_czworo;
-
-        vector <string> split_line(string);
-        int wyst(string);
-        string f_line(string);
+        vector <string> split(string);
+        string simplify(string);
         int str2int(string);
         float str2f(string);
-        void ObjLoader(string);
-
+        void modelLoader(string);
+        int licz_wierz;
 
     protected:
         int pozycjaX;
