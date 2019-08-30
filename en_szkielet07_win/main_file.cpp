@@ -244,16 +244,34 @@ vector<bierka*> initBierki()
 
     for(int j=0; j < 8; j++)
     {
-        bierka * temp = new bierka(j, 1);
-        temp->modelLoader("pion.obj");
-        bierki.push_back(temp);
+        bierka * Pion = new bierka(j, 1);
+        bierki.push_back(Pion);
     }
 
     for(int j=0; j < 8; j++)
     {
-        bierka * temp = new bierka(j, 6);
-        temp->modelLoader("pion.obj");
-        bierki.push_back(temp);
+        bierka * Pion = new bierka(j, 6);
+        bierki.push_back(Pion);
+    }
+
+    bierka * temp = new bierka(1, 1);
+    temp->modelLoader("pion.obj");
+
+    for(int j=0; j<bierki.size(); j++)
+    {
+        bierki.at(j)->wierzcholki = temp->wierzcholki;
+        bierki.at(j)->tekstury = temp->tekstury;
+        bierki.at(j)->normalne = temp->normalne;
+
+        bierki.at(j)->vert = temp->vert;
+        bierki.at(j)->tex = temp->tex;
+        bierki.at(j)->norm = temp->norm;
+
+        bierki.at(j)->w_indeksy = temp->w_indeksy;
+        bierki.at(j)->t_indeksy = temp->t_indeksy;
+        bierki.at(j)->n_indeksy = temp->n_indeksy;
+
+        bierki.at(j)->licz_wierz = temp->licz_wierz;
     }
 
     for(int j=0; j < 8; j+=7)
@@ -334,7 +352,7 @@ int main(void)
                    bierki.at(j)->getY() == ruchy.at(i).y2 )
                 {
                     bierki.at(j)->over();
-                    bierki.erase(bierki.begin() + j);
+                    // bierki.erase(bierki.begin() + j);
                 }
 
                 if(bierki.at(j)->getX() == ruchy.at(i).x1 &&

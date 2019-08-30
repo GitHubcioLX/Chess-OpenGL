@@ -25,7 +25,7 @@ void main(void) {
     vec4 l=normalize(V*(lp-M*vertex)); //Light vector in eye space
     vec4 n=normalize(V*M*normal); //Normal vector in eye space
 
-    float nl=clamp(dot(n,l),0.3,1);
+    float nl=clamp(dot(n,l),0.5,1);
 
     ic=vec4(kd.rgb*nl,kd.a);
     gl_Position=P*V*M*vertex;
