@@ -1962,7 +1962,7 @@
 1553527499 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\shaderprogram.cpp
 	"shaderprogram.h"
 
-1567019781 source:c:\users\kskcp\desktop\chess-with-template\en_szkielet07_win\bierka.cpp
+1567378838 source:c:\users\kskcp\desktop\chess-with-template\en_szkielet07_win\bierka.cpp
 	"bierka.h"
 	<iostream>
 	<fstream>
@@ -1970,7 +1970,7 @@
 	<string>
 	<cstdlib>
 
-1567019781 c:\users\kskcp\desktop\chess-with-template\en_szkielet07_win\bierka.h
+1567378084 c:\users\kskcp\desktop\chess-with-template\en_szkielet07_win\bierka.h
 	<vector>
 	<string>
 

@@ -7,11 +7,26 @@
 
 using namespace std;
 
-bierka::bierka(int x, int y)
+bierka::bierka(int x, int y, bool t)
 {
     pozycjaX = x;
     pozycjaY = y;
+    team = t;
     licz_wierz = 0;
+}
+
+bierka::copy(const bierka &og)
+{
+    wierzcholki = og.wierzcholki;
+    tekstury = og.tekstury;
+    normalne = og.normalne;
+    vert = og.vert;
+    tex = og.tex;
+    norm = og.norm;
+    w_indeksy = og.w_indeksy;
+    t_indeksy = og.t_indeksy;
+    n_indeksy = og.n_indeksy;
+    licz_wierz = og.licz_wierz;
 }
 
 bierka::~bierka()

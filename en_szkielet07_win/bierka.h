@@ -9,7 +9,8 @@ using namespace std;
 class bierka
 {
     public:
-        bierka(int, int);
+        bierka(int, int, bool);
+        copy(const bierka&);
         virtual ~bierka();
         void ruch(int, int);
         void over();
@@ -17,6 +18,7 @@ class bierka
         int getY();
         void setX(int);
         void setY(int);
+        bool team;
         vector < float > wierzcholki;
         vector < float > tekstury;
         vector < float > normalne;

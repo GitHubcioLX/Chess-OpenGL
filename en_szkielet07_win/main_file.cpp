@@ -95,7 +95,7 @@ GLuint readTexture(const char* filename) {
 }
 
 
-bierka * szachownica = new bierka(-1,-1);
+bierka * szachownica = new bierka(-1,-1, 0);
 
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
@@ -153,7 +153,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
         M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Compute model matrix
         M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Compute model matrix
         M=glm::translate(M, glm::vec3(pozX,0.0f,pozY));
-        if(i>23) M=glm::rotate(M,3.1416f,glm::vec3(0.0f,1.0f,0.0f));
+        if(!bierki.at(i)->team) M=glm::rotate(M,3.1416f,glm::vec3(0.0f,1.0f,0.0f));
 
         float *verts=&bierki.at(i)->vert[0];
         float *normals=&bierki.at(i)->norm[0];
@@ -174,7 +174,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
         //glUniform1i(sp->u("textureMap1"),1);
         //glActiveTexture(GL_TEXTURE1);
         //glBindTexture(GL_TEXTURE_2D,tex1);
-        if((i>7 && i<16) || (i>23)) glUniform4f(sp->u("color"),0.1,0.1,0.1,1);
+        if(!bierki.at(i)->team) glUniform4f(sp->u("color"),0.1,0.1,0.1,1);
         else glUniform4f(sp->u("color"),1,1,1,1);
 
         glEnableVertexAttribArray(sp->a("vertex")); //Enable sending data to the attribute vertex
@@ -244,54 +244,53 @@ vector<bierka*> initBierki()
 
     for(int j=0; j < 8; j++)
     {
-        bierka * Pion = new bierka(j, 1);
+        bierka * Pion = new bierka(j, 1, 1);
         bierki.push_back(Pion);
     }
 
     for(int j=0; j < 8; j++)
     {
-        bierka * Pion = new bierka(j, 6);
+        bierka * Pion = new bierka(j, 6, 0);
         bierki.push_back(Pion);
     }
 
-    bierka * temp = new bierka(1, 1);
-    temp->modelLoader("pion.obj");
+    bierka * tempPion = new bierka(0, 0, 0);
+    tempPion->modelLoader("pion.obj");
+    bierka * tempWieza = new bierka(0, 0, 0);
+    tempWieza->modelLoader("tour.obj");
+    bierka * tempSkoczek = new bierka(0, 0, 0);
+    tempSkoczek->modelLoader("cavalier.obj");
+    bierka * tempGoniec = new bierka(0, 0, 0);
+    tempGoniec->modelLoader("fou.obj");
+    bierka * tempHetman = new bierka(0, 0, 0);
+    tempHetman->modelLoader("dame.obj");
+    bierka * tempKrol = new bierka(0, 0, 0);
+    tempKrol->modelLoader("roi.obj");
 
     for(int j=0; j<bierki.size(); j++)
     {
-        bierki.at(j)->wierzcholki = temp->wierzcholki;
-        bierki.at(j)->tekstury = temp->tekstury;
-        bierki.at(j)->normalne = temp->normalne;
-
-        bierki.at(j)->vert = temp->vert;
-        bierki.at(j)->tex = temp->tex;
-        bierki.at(j)->norm = temp->norm;
-
-        bierki.at(j)->w_indeksy = temp->w_indeksy;
-        bierki.at(j)->t_indeksy = temp->t_indeksy;
-        bierki.at(j)->n_indeksy = temp->n_indeksy;
-
-        bierki.at(j)->licz_wierz = temp->licz_wierz;
+        bierki.at(j)->copy(*tempPion);
     }
 
-    for(int j=0; j < 8; j+=7)
+    for(int j=0; j < 2; j+=1)
     {
-        bierka * Wieza1 = new bierka(0, j);
-        Wieza1->modelLoader("tour.obj");
-        bierka * Skoczek1 = new bierka(1, j);
-        Skoczek1->modelLoader("cavalier.obj");
-        bierka * Goniec1 = new bierka(2, j);
-        Goniec1->modelLoader("fou.obj");
-        bierka * Hetman = new bierka(3, j);
-        Hetman->modelLoader("dame.obj");
-        bierka * Krol = new bierka(4, j);
-        Krol->modelLoader("roi.obj");
-        bierka * Goniec2 = new bierka(5, j);
-        Goniec2->modelLoader("fou.obj");
-        bierka * Skoczek2 = new bierka(6, j);
-        Skoczek2->modelLoader("cavalier.obj");
-        bierka * Wieza2 = new bierka(7, j);
-        Wieza2->modelLoader("tour.obj");
+        bool t = (-1)*j+1;
+        bierka * Wieza1 = new bierka(0, j*7, t);
+        Wieza1->copy(*tempWieza);
+        bierka * Skoczek1 = new bierka(1, j*7, t);
+        Skoczek1->copy(*tempSkoczek);
+        bierka * Goniec1 = new bierka(2, j*7, t);
+        Goniec1->copy(*tempGoniec);
+        bierka * Hetman = new bierka(3, j*7, t);
+        Hetman->copy(*tempHetman);
+        bierka * Krol = new bierka(4, j*7, t);
+        Krol->copy(*tempKrol);
+        bierka * Goniec2 = new bierka(5, j*7, t);
+        Goniec2->copy(*tempGoniec);
+        bierka * Skoczek2 = new bierka(6, j*7, t);
+        Skoczek2->copy(*tempSkoczek);
+        bierka * Wieza2 = new bierka(7, j*7, t);
+        Wieza2->copy(*tempWieza);
 
         bierki.push_back(Wieza1);
         bierki.push_back(Skoczek1);
@@ -352,7 +351,7 @@ int main(void)
                    bierki.at(j)->getY() == ruchy.at(i).y2 )
                 {
                     bierki.at(j)->over();
-                    // bierki.erase(bierki.begin() + j);
+                    bierki.erase(bierki.begin() + j);
                 }
 
                 if(bierki.at(j)->getX() == ruchy.at(i).x1 &&
