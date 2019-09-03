@@ -28,6 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <algorithm>
 #include "constants.h"
 #include "lodepng.h"
 #include "shaderprogram.h"
@@ -137,12 +139,26 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	float pozX, pozY;
+	float pozX, pozY, pozZ;
+	Wsp anim;
 
     for(int i = 0; i < bierki.size(); i++)
     {
-        pozX = -1.1f+(2.2/7.0)*bierki.at(i)->getX();
-        pozY = 1.1f-(2.2/7.0)*bierki.at(i)->getY();
+        if(!bierki.at(i)->moving)
+        {
+            pozX = -1.1f+(2.2/7.0)*bierki.at(i)->getX();
+            pozY = 1.1f-(2.2/7.0)*bierki.at(i)->getY();
+            pozZ = 0.0;
+        }
+        else
+        {
+            anim = (bierki.at(i)->animacja).at(bierki.at(i)->animacja.size()-1);
+            (bierki.at(i)->animacja).pop_back();
+            pozX = anim.x;
+            pozY = anim.y;
+            pozZ = max(anim.z, float(0.0));
+            if(bierki.at(i)->animacja.size()==0) bierki.at(i)->moving=0;
+        }
 
         glm::mat4 V=glm::lookAt(
             glm::vec3(0.0f,0.0f,-5.0f),
@@ -152,7 +168,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
         glm::mat4 M=glm::mat4(1.0f);
         M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Compute model matrix
         M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Compute model matrix
-        M=glm::translate(M, glm::vec3(pozX,0.0f,pozY));
+        M=glm::translate(M, glm::vec3(pozX,pozZ,pozY));
         if(!bierki.at(i)->team) M=glm::rotate(M,3.1416f,glm::vec3(0.0f,1.0f,0.0f));
 
         float *verts=&bierki.at(i)->vert[0];
@@ -333,34 +349,41 @@ vector<Ruch> parse()
 }
 
 
+ vector<Wsp> calcMove(int x1, int y1, int x2, int y2)
+ {
+    vector <Wsp> res;
+    int nrOfSteps = 40;
+    float newX1 = -1.1f+(2.2/7.0)*x1;
+    float newY1 = 1.1f-(2.2/7.0)*y1;
+    float newX2 = -1.1f+(2.2/7.0)*x2;
+    float newY2 = 1.1f-(2.2/7.0)*y2;
+    float lengthX = newX2-newX1;
+    float lengthY = newY2-newY1;
+    float stepX = lengthX/float(nrOfSteps);
+    float stepY = lengthY/float(nrOfSteps);
+    Wsp temp;
+    float a = -16.0/(5.0 * nrOfSteps * nrOfSteps);
+    for(int i=0; i<=nrOfSteps; i++)
+    {
+        temp.x = newX2-i*stepX;
+        temp.y = newY2-i*stepY;
+        temp.z = a * float(pow(i-(nrOfSteps/2), 2)) + 0.8;
+        res.push_back(temp);
+    }
+    return res;
+ }
+
+ void clearFlags(vector<bierka*> bierki)
+ {
+     for(int i=0; i<bierki.size(); i++) bierki.at(i)->moving = 0;
+ }
+
 int main(void)
 {
     vector<Ruch> ruchy = parse();
     vector<bierka*>  bierki = initBierki();
 
-    for(int i=0; i < ruchy.size(); i++)
-    {
-            cout << "Obsluguje ruch " <<
-            ruchy.at(i).x1 << ' ' <<
-            ruchy.at(i).y1 << ' ' <<
-            ruchy.at(i).x2 << ' ' <<
-            ruchy.at(i).y2 << endl;
-            for(int j=0; j < bierki.size(); j++)
-            {
-                if(bierki.at(j)->getX() == ruchy.at(i).x2 &&
-                   bierki.at(j)->getY() == ruchy.at(i).y2 )
-                {
-                    bierki.at(j)->over();
-                    bierki.erase(bierki.begin() + j);
-                }
 
-                if(bierki.at(j)->getX() == ruchy.at(i).x1 &&
-                   bierki.at(j)->getY() == ruchy.at(i).y1 )
-                {
-                    bierki.at(j)->ruch(ruchy.at(i).x2, ruchy.at(i).y2);
-                }
-            }
-    }
 
 	GLFWwindow* window; //Pointer to object that represents the application window
 
@@ -395,12 +418,55 @@ int main(void)
 	float angle_y=0; //current rotation angle of the object, y axis
 	glfwSetTime(0); //Zero the timer
 	//Main application loop
+
+    int i=0, time=0;
+    vector<Wsp> animacja;
+    Wsp temp;
 	while (!glfwWindowShouldClose(window)) //As long as the window shouldnt be closed yet...
 	{
         angle_x+=speed_x*glfwGetTime(); //Add angle by which the object was rotated in the previous iteration
 		angle_y+=speed_y*glfwGetTime(); //Add angle by which the object was rotated in the previous iteration
         glfwSetTime(0); //Zero the timer
-		drawScene(window, angle_x, angle_y, bierki); //Execute drawing procedure
+
+        drawScene(window, angle_x, angle_y, bierki); //Execute drawing procedure
+
+        if(i < ruchy.size() && time % 80 == 0 && time > 200)
+        {
+            cout << "Obsluguje ruch " <<
+            ruchy.at(i).x1 << ' ' <<
+            ruchy.at(i).y1 << ' ' <<
+            ruchy.at(i).x2 << ' ' <<
+            ruchy.at(i).y2 << endl;
+            for(int j=0; j < bierki.size(); j++)
+            {
+                if(bierki.at(j)->getX() == ruchy.at(i).x2 &&
+                   bierki.at(j)->getY() == ruchy.at(i).y2 )
+                {
+                    animacja.clear();
+                    animacja = calcMove(ruchy.at(i).x2, ruchy.at(i).y2, -10, ruchy.at(i).y2);
+
+                    bierki.at(j)->animacja = animacja;
+                    bierki.at(j)->over();
+                    //bierki.erase(bierki.begin() + j);
+                    bierki.at(j)->moving = 1;
+                }
+
+                if(bierki.at(j)->getX() == ruchy.at(i).x1 &&
+                   bierki.at(j)->getY() == ruchy.at(i).y1 )
+                {
+                    animacja.clear();
+                    animacja = calcMove(ruchy.at(i).x1, ruchy.at(i).y1, ruchy.at(i).x2, ruchy.at(i).y2);
+
+                    bierki.at(j)->animacja = animacja;
+                    bierki.at(j)->ruch(ruchy.at(i).x2, ruchy.at(i).y2);
+                    bierki.at(j)->moving = 1;
+                }
+            }
+            i++;
+        }
+        time++;
+
+
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
 	freeOpenGLProgram(window);

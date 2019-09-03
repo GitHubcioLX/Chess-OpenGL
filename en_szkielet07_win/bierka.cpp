@@ -13,6 +13,7 @@ bierka::bierka(int x, int y, bool t)
     pozycjaY = y;
     team = t;
     licz_wierz = 0;
+    moving = 0;
 }
 
 bierka::copy(const bierka &og)
@@ -42,8 +43,8 @@ void bierka::ruch(int x, int y)
 
 void bierka::over()
 {
-    pozycjaX = -1;
-    pozycjaY = -1;
+    pozycjaX = -100000;
+    pozycjaY = -100000;
 }
 
 int bierka::getX()

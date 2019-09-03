@@ -1,10 +1,15 @@
 #ifndef BIERKA_H
 #define BIERKA_H
-#include <vector>
+#include<vector>
 #include<string>
 
 using namespace std;
 
+typedef struct wsp {
+    float x;
+    float y;
+    float z;
+} Wsp;
 
 class bierka
 {
@@ -31,12 +36,15 @@ class bierka
         vector < int > t_indeksy;
         vector < int > n_indeksy;
 
+        vector < Wsp > animacja;
+
         vector <string> split(string);
         string simplify(string);
         int str2int(string);
         float str2f(string);
         void modelLoader(string);
         int licz_wierz;
+        bool moving;
 
     protected:
         int pozycjaX;
