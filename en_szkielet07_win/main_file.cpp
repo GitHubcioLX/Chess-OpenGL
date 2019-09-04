@@ -156,7 +156,10 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
             (bierki.at(i)->animacja).pop_back();
             pozX = anim.x;
             pozY = anim.y;
-            pozZ = max(anim.z, float(0.0));
+            if(bierki.at(i)->knight || bierki.at(i)->death)
+                pozZ = max(anim.z, float(0.0));
+            else
+                pozZ = 0.0;
             if(bierki.at(i)->animacja.size()==0) bierki.at(i)->moving=0;
         }
 
@@ -308,6 +311,9 @@ vector<bierka*> initBierki()
         bierka * Wieza2 = new bierka(7, j*7, t);
         Wieza2->copy(*tempWieza);
 
+        Skoczek1->knight = 1;
+        Skoczek2->knight = 1;
+
         bierki.push_back(Wieza1);
         bierki.push_back(Skoczek1);
         bierki.push_back(Goniec1);
@@ -449,6 +455,7 @@ int main(void)
                     bierki.at(j)->over();
                     //bierki.erase(bierki.begin() + j);
                     bierki.at(j)->moving = 1;
+                    bierki.at(j)->death = 1;
                 }
 
                 if(bierki.at(j)->getX() == ruchy.at(i).x1 &&

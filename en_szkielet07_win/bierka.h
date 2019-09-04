@@ -45,6 +45,8 @@ class bierka
         void modelLoader(string);
         int licz_wierz;
         bool moving;
+        bool death;
+        bool knight;
 
     protected:
         int pozycjaX;

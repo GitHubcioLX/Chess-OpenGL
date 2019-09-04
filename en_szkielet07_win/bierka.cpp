@@ -14,6 +14,8 @@ bierka::bierka(int x, int y, bool t)
     team = t;
     licz_wierz = 0;
     moving = 0;
+    death=0;
+    knight=0;
 }
 
 bierka::copy(const bierka &og)
