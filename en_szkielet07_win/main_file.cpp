@@ -183,7 +183,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
         glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
         glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
         glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
-        glUniform4f(sp->u("lp"),0,0,-6,1); //Light coordinates in the world space
+        glUniform4f(sp->u("lp"),0,2,-6,1); //Light coordinates in the world space
 
         if(!bierki.at(i)->team)
         {
@@ -236,7 +236,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
     glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
     glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
     glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
-    glUniform4f(sp->u("lp"),0,0,-6,1);
+    glUniform4f(sp->u("lp"),0,2,-6,1);
 
     glUniform1i(sp->u("textureMap0"),0);
     glActiveTexture(GL_TEXTURE0);
@@ -413,7 +413,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	window = glfwCreateWindow(900, 900, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it.
+	window = glfwCreateWindow(1000, 1000, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it.
 
 	if (!window) //If no window is opened then close the program
 	{

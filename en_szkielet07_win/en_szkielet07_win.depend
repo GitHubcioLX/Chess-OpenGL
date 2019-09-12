@@ -1019,7 +1019,7 @@
 	<iostream>
 	"lodepng.h"
 
-1568307761 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\main_file.cpp
+1568319781 source:c:\users\admin\desktop\chess-with-template\en_szkielet07_win\main_file.cpp
 	<GL/glew.h>
 	<GLFW/glfw3.h>
 	<glm/glm.hpp>

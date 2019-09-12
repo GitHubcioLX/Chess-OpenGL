@@ -14,7 +14,7 @@ uniform sampler2D textureMap1;
 out vec4 pixelColor; //Fragment shader output variable
 
 void main(void) {
-    vec4 kd=mix(texture(textureMap0,iTexCoord0),texture(textureMap1,iTexCoord1),0.01); //Material color for a diffused light
+    vec4 kd=mix(texture(textureMap0,iTexCoord0),texture(textureMap1,iTexCoord1),0.15); //Material color for a diffused light
     vec4 ld=vec4(1,1,1,1); //Color of the diffused light
     vec4 ks=vec4(1,1,1,1); //Material color for a reflected light
     vec4 ls=vec4(1,1,1,1); //Color of the reflected light
