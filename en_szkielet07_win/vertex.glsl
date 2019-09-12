@@ -4,29 +4,29 @@
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
-uniform vec4 color;
+uniform vec4 lp; //Light source coordinates in world space
 
 //Attributes
 in vec4 vertex; //vertex coordinates in model space
 in vec4 normal; //normal vector coordinates in model space
-//in vec4 color; //color associated with the vertex
+in vec2 texCoord0; //texturing coordinates
 
 //Varying variables
-out vec4 ic;
+out vec4 l;
+out vec4 n;
+out vec4 v;
+out vec2 iTexCoord0;
+out vec2 iTexCoord1;
 
 void main(void) {
 
-    vec4 kd=color;
-    //vec4(0.9f,0.9f,0.9f,1.0f); //Object color
-    vec4 ld=vec4(1,1,1,1); //Light color
+    l=normalize(V*(lp-M*vertex)); //Vector "towards the light" in the eye space
+    n=normalize(V*M*normal); //Normal vector in the eye space
+    v=normalize(vec4(0,0,0,1)-V*M*vertex); //Vector "towards the viewer" in the eye space
 
-    vec4 lp=vec4(0,0.5,0.1,1);//Light source location in world space
 
-    vec4 l=normalize(V*(lp-M*vertex)); //Light vector in eye space
-    vec4 n=normalize(V*M*normal); //Normal vector in eye space
+    iTexCoord0=texCoord0; //Interpolate texturing coordinates from texCoord0 attribute
+    iTexCoord1=(n.xy+1)/2; //Compute and interpolate texturing coordinates for environment mapping
 
-    float nl=clamp(dot(n,l),0.5,1);
-
-    ic=vec4(kd.rgb*nl,kd.a);
     gl_Position=P*V*M*vertex;
 }

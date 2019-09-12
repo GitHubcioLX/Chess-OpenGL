@@ -131,7 +131,7 @@ void bierka::modelLoader(string filename) {
             for(int i = 1; i < splitted.size(); i++)
             {
                 koord = splitted[i];
-                tekstury.push_back(atof(koord.c_str())/240.0);
+                tekstury.push_back(atof(koord.c_str()));
             }
         }
         else if(wiersz[0] == 'v' && wiersz[1] == 'n')
@@ -139,7 +139,7 @@ void bierka::modelLoader(string filename) {
             for(int i = 1; i < splitted.size(); i++)
             {
                 koord = splitted[i];
-                normalne.push_back(atof(koord.c_str())/240.0);
+                normalne.push_back(atof(koord.c_str()));
             }
         }
         else if(wiersz[0] == 'f')
@@ -186,15 +186,15 @@ void bierka::modelLoader(string filename) {
             vert.push_back(wierzcholki[3*w_indeksy[i] + j]);
             norm.push_back(normalne[3*n_indeksy[i] + j]);
         }
-        if(tekstury.size() > 0)
+        vert.push_back(1.0f);
+        norm.push_back(0.0f);
+        for(int j = 0; j < 2; j++)
         {
-            for(int j = 0; j < 2; j++)
-            {
-                tex.push_back(tekstury[2*t_indeksy[i] + j]);
-            }
+            tex.push_back(tekstury[2*t_indeksy[i] + j]);
         }
     }
     licz_wierz = w_indeksy.size();
     cout << licz_wierz << endl;
+    cout << tex.at(10) << " " << tex.at(11) << endl;
     plik.close();
 }

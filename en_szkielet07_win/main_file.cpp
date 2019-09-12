@@ -44,6 +44,8 @@ ShaderProgram *sp; //Pointer to the shader program
 
 GLuint tex0;
 GLuint tex1;
+GLuint tex2;
+GLuint tex3;
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -108,8 +110,11 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetKeyCallback(window,keyCallback);
 	sp=new ShaderProgram("vertex.glsl",NULL,"fragment.glsl");
 
-    tex0=readTexture("metal.png");
+    tex0=readTexture("board.png");
     tex1=readTexture("sky.png");
+    tex2=readTexture("black.png");
+    tex3=readTexture("white.png");
+
     szachownica->modelLoader("plane.obj");
 
 }
@@ -120,16 +125,10 @@ void freeOpenGLProgram(GLFWwindow* window) {
 
     glDeleteTextures(1,&tex0);
     glDeleteTextures(1,&tex1);
+    glDeleteTextures(1,&tex2);
+    glDeleteTextures(1,&tex3);
 
     delete sp;
-}
-
-void drawFigure(bierka * bierka)
-{
-    float *verts=&bierka->vert[0];
-	float *normals=&bierka->norm[0];
-	float *texCoords=&bierka->tex[0];
-	unsigned int vertexCount=bierka->licz_wierz;
 }
 
 
@@ -148,7 +147,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
         {
             pozX = -1.1f+(2.2/7.0)*bierki.at(i)->getX();
             pozY = 1.1f-(2.2/7.0)*bierki.at(i)->getY();
-            pozZ = 0.0;
+            pozZ = 0.00005;
         }
         else
         {
@@ -157,9 +156,9 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
             pozX = anim.x;
             pozY = anim.y;
             if(bierki.at(i)->knight || bierki.at(i)->death)
-                pozZ = max(anim.z, float(0.0));
+                pozZ = max(anim.z, float(0.00005));
             else
-                pozZ = 0.0;
+                pozZ = 0.00005;
             if(bierki.at(i)->animacja.size()==0) bierki.at(i)->moving=0;
         }
 
@@ -184,67 +183,83 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, vector <bierka*
         glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
         glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
         glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
-        //glUniform4f(sp->u("lp"),0,0,-6,1); //Light coordinates in the world space
+        glUniform4f(sp->u("lp"),0,0,-6,1); //Light coordinates in the world space
 
-        //glUniform1i(sp->u("textureMap0"),0);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D,tex0);
+        if(!bierki.at(i)->team)
+        {
+            glUniform1i(sp->u("textureMap0"),0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D,tex2);
+        }
+        else
+        {
+            glUniform1i(sp->u("textureMap0"),0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D,tex3);
+        }
 
-        //glUniform1i(sp->u("textureMap1"),1);
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D,tex1);
-        if(!bierki.at(i)->team) glUniform4f(sp->u("color"),0.1,0.1,0.1,1);
-        else glUniform4f(sp->u("color"),1,1,1,1);
+        glUniform1i(sp->u("textureMap1"),1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D,tex1);
 
         glEnableVertexAttribArray(sp->a("vertex")); //Enable sending data to the attribute vertex
-        glVertexAttribPointer(sp->a("vertex"),3,GL_FLOAT,false,0,verts); //Specify source of the data for the attribute vertex
+        glVertexAttribPointer(sp->a("vertex"),4,GL_FLOAT,false,0,verts); //Specify source of the data for the attribute vertex
 
         glEnableVertexAttribArray(sp->a("normal")); //Enable sending data to the attribute normal
-        glVertexAttribPointer(sp->a("normal"),3,GL_FLOAT,false,0,normals); //Specify source of the data for the attribute normal
+        glVertexAttribPointer(sp->a("normal"),4,GL_FLOAT,false,0,normals); //Specify source of the data for the attribute normal
 
-        //glEnableVertexAttribArray(sp->a("texCoord0")); //Enable sending data to the attribute color
-        //glVertexAttribPointer(sp->a("texCoord0"),2,GL_FLOAT,false,0,texCoords); //Specify source of the data for the attribute color
-
+        glEnableVertexAttribArray(sp->a("texCoord0")); //Enable sending data to the attribute color
+        glVertexAttribPointer(sp->a("texCoord0"),2,GL_FLOAT,false,0,texCoords); //Specify source of the data for the attribute color
 
         glDrawArrays(GL_TRIANGLES,0,vertexCount); //Draw the object
 
         glDisableVertexAttribArray(sp->a("vertex")); //Disable sending data to the attribute vertex
         glDisableVertexAttribArray(sp->a("normal")); //Disable sending data to the attribute normal
-        //glDisableVertexAttribArray(sp->a("texCoord0")); //Disable sending data to the attribute color
-
+        glDisableVertexAttribArray(sp->a("texCoord0")); //Disable sending data to the attribute color
     }
 
-        glm::mat4 V=glm::lookAt(
-            glm::vec3(0.0f,0.0f,-5.0f),
-            glm::vec3(0.0f,0.0f,0.0f),
-            glm::vec3(0.0f,1.0f,0.0f)); //compute view matrix
-        glm::mat4 P=glm::perspective(50.0f*PI/180.0f, aspectRatio, 1.0f, 50.0f); //compute projection matrix
-        glm::mat4 M=glm::mat4(1.0f);
-        M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Compute model matrix
-        M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Compute model matrix
+    glm::mat4 V=glm::lookAt(
+        glm::vec3(0.0f,0.0f,-5.0f),
+        glm::vec3(0.0f,0.0f,0.0f),
+        glm::vec3(0.0f,1.0f,0.0f)); //compute view matrix
+    glm::mat4 P=glm::perspective(50.0f*PI/180.0f, aspectRatio, 1.0f, 50.0f); //compute projection matrix
+    glm::mat4 M=glm::mat4(1.0f);
+    M=glm::rotate(M,angle_y,glm::vec3(1.0f,0.0f,0.0f)); //Compute model matrix
+    M=glm::rotate(M,angle_x,glm::vec3(0.0f,1.0f,0.0f)); //Compute model matrix
 
-        float *verts=&szachownica->vert[0];
-        float *normals=&szachownica->norm[0];
-        float *texCoords=&szachownica->tex[0];
-        unsigned int vertexCount=szachownica->licz_wierz;
+    float *verts=&szachownica->vert[0];
+    float *normals=&szachownica->norm[0];
+    float *texCoords=&szachownica->tex[0];
+    unsigned int vertexCount=szachownica->licz_wierz;
 
-        sp->use();
-        glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
-        glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
-        glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
+    sp->use();
+    glUniformMatrix4fv(sp->u("P"),1,false,glm::value_ptr(P));
+    glUniformMatrix4fv(sp->u("V"),1,false,glm::value_ptr(V));
+    glUniformMatrix4fv(sp->u("M"),1,false,glm::value_ptr(M));
+    glUniform4f(sp->u("lp"),0,0,-6,1);
 
-        glUniform4f(sp->u("color"),0.87,0.72,0.53,0);
+    glUniform1i(sp->u("textureMap0"),0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D,tex0);
 
-        glEnableVertexAttribArray(sp->a("vertex")); //Enable sending data to the attribute vertex
-        glVertexAttribPointer(sp->a("vertex"),3,GL_FLOAT,false,0,verts); //Specify source of the data for the attribute vertex
+    glUniform1i(sp->u("textureMap1"),1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D,tex1);
 
-        glEnableVertexAttribArray(sp->a("normal")); //Enable sending data to the attribute normal
-        glVertexAttribPointer(sp->a("normal"),3,GL_FLOAT,false,0,normals); //Specify source of the data for the attribute normal
+    glEnableVertexAttribArray(sp->a("vertex")); //Enable sending data to the attribute vertex
+    glVertexAttribPointer(sp->a("vertex"),4,GL_FLOAT,false,0,verts); //Specify source of the data for the attribute vertex
 
-        glDrawArrays(GL_TRIANGLES,0,vertexCount); //Draw the object
+    glEnableVertexAttribArray(sp->a("normal")); //Enable sending data to the attribute normal
+    glVertexAttribPointer(sp->a("normal"),4,GL_FLOAT,false,0,normals); //Specify source of the data for the attribute normal
 
-        glDisableVertexAttribArray(sp->a("vertex")); //Disable sending data to the attribute vertex
-        glDisableVertexAttribArray(sp->a("normal")); //Disable sending data to the attribute normal
+    glEnableVertexAttribArray(sp->a("texCoord0")); //Enable sending data to the attribute color
+    glVertexAttribPointer(sp->a("texCoord0"),2,GL_FLOAT,false,0,texCoords); //Specify source of the data for the attribute color
+
+    glDrawArrays(GL_TRIANGLES,0,vertexCount); //Draw the object
+
+    glDisableVertexAttribArray(sp->a("vertex")); //Disable sending data to the attribute vertex
+    glDisableVertexAttribArray(sp->a("normal")); //Disable sending data to the attribute normal
+    glDisableVertexAttribArray(sp->a("texCoord0")); //Disable sending data to the attribute color
 
     glfwSwapBuffers(window); //Copy back buffer to front buffer
 }
@@ -389,8 +404,6 @@ int main(void)
     vector<Ruch> ruchy = parse();
     vector<bierka*>  bierki = initBierki();
 
-
-
 	GLFWwindow* window; //Pointer to object that represents the application window
 
 	glfwSetErrorCallback(error_callback);//Register error processing callback procedure
@@ -472,7 +485,6 @@ int main(void)
             i++;
         }
         time++;
-
 
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
